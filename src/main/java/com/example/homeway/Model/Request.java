@@ -75,9 +75,9 @@ public class Request {
     private Offer offer;
 
     @OneToMany(mappedBy = "request")
-    private Report report;
+    private Set<Report> reports;
 
     @OneToMany(mappedBy = "request")
-    private Review review;
+    private Set<Review> reviews;
 
 }

@@ -2,11 +2,11 @@ package com.example.homeway.Controller;
 
 import com.example.homeway.API.APIResponse;
 import com.example.homeway.DTO.In.CompanyDTOIn;
-import com.example.homeway.DTO.In.CompanyRegisterDTOIn;
+import com.example.homeway.DTO.In.CompanyDTOIn;
 import com.example.homeway.DTO.In.CustomerDTOIn;
-import com.example.homeway.DTO.In.CustomerRegisterDTOIn;
+import com.example.homeway.DTO.In.CustomerDTOIn;
 import com.example.homeway.DTO.In.WorkerDTOIn;
-import com.example.homeway.DTO.In.WorkerRegisterDTOIn;
+import com.example.homeway.DTO.In.WorkerDTOIn;
 import com.example.homeway.Service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

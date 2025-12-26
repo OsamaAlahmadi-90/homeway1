@@ -31,7 +31,8 @@ public class Offer {
     private LocalDateTime createdAt;
 
     @OneToOne
+    @JoinColumn(name = "request_id")
     @JsonIgnore
-    private Set<Request> requests;
+    private Request request;
 
 }

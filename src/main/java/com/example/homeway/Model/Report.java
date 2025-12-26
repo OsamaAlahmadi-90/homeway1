@@ -34,5 +34,5 @@ public class Report {
 
     @ManyToOne
     @JsonIgnore
-    private Set<Request> requests;
+    private Request request;
 }

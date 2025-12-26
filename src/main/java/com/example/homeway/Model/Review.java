@@ -36,6 +36,6 @@ public class Review {
 
     @ManyToOne
     @JsonIgnore
-    private Set<Request> requests;
+    private Request request;
 
 }
