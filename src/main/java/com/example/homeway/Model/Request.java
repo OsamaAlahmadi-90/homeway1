@@ -62,14 +62,9 @@ public class Request {
     @JsonIgnore
     private Vehicle vehicle;
 
-    @ManyToMany
-    @JoinTable(
-            name = "request_workers",
-            joinColumns = @JoinColumn(name = "request_id"),
-            inverseJoinColumns = @JoinColumn(name = "worker_id")
-    )
+    @ManyToOne
     @JsonIgnore
-    private Set<Worker> workers;
+    private Worker worker;
 
     @OneToOne(mappedBy = "request", cascade = CascadeType.ALL)
     private Offer offer;

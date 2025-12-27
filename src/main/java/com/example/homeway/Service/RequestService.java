@@ -73,6 +73,8 @@ public class RequestService {
         request.setCompany(company);
         requestRepository.save(request);
     }
+
+    @Transactional
     public void requestMoveToHouse(User user, Integer propertyId, RequestDTOIn dto,Integer companyID){
         if (user == null) throw new ApiException("unauthorized");
         Customer customer = user.getCustomer();
@@ -116,4 +118,88 @@ public class RequestService {
         requestRepository.save(request);
     }
 
+    public void requestMaintenance(User user, Integer propertyId, RequestDTOIn dto, Integer companyID){
+        if (user == null) throw new ApiException("unauthorized");
+        Customer customer = user.getCustomer();
+        if (customer == null) throw new ApiException("customer profile not found");
+
+
+        Property property = propertyRepository.findPropertyById(propertyId);
+        if (property == null) {
+            throw new ApiException("property not found with id: " + propertyId);
+        }
+
+        if (property.getCustomer() == null || !property.getCustomer().getId().equals(customer.getId())) {
+            throw new ApiException("you can only request maintenance for your own property");
+        }
+
+        Company company = companyRepository.findCompanyById(companyID);
+        if (company == null) {
+            throw new ApiException("company not found with id: " + companyID);
+        }
+
+        if (company.getUser() == null || !"MAINTENANCE_COMPANY".equalsIgnoreCase(company.getUser().getRole())) {
+            throw new ApiException("selected company is not an MAINTENANCE_COMPANY");
+        }
+
+        Request request = new Request();
+        request.setStatus("pending");
+        request.setType("maintenance");
+        request.setCreatedAt(LocalDateTime.now());
+        request.setStartDate(null);
+        request.setEndDate(null);
+        request.setIsPaid(false);
+
+        request.setTimeWindow(dto.getTimeWindow());
+        request.setDescription(dto.getDescription());
+
+        request.setCustomer(customer);
+        request.setProperty(property);
+
+        request.setCompany(company);
+        requestRepository.save(request);
+    }
+
+    @Transactional
+    public void requestResign(User user, Integer propertyId, RequestDTOIn dto, Integer companyID){
+        if (user == null) throw new ApiException("unauthorized");
+        Customer customer = user.getCustomer();
+        if (customer == null) throw new ApiException("customer profile not found");
+
+
+        Property property = propertyRepository.findPropertyById(propertyId);
+        if (property == null) {
+            throw new ApiException("property not found with id: " + propertyId);
+        }
+
+        if (property.getCustomer() == null || !property.getCustomer().getId().equals(customer.getId())) {
+            throw new ApiException("you can only request Redesign for your own property");
+        }
+
+        Company company = companyRepository.findCompanyById(companyID);
+        if (company == null) {
+            throw new ApiException("company not found with id: " + companyID);
+        }
+
+        if (company.getUser() == null || !"REDESIGN_COMPANY".equalsIgnoreCase(company.getUser().getRole())) {
+            throw new ApiException("selected company is not an REDESIGN_COMPANY");
+        }
+
+        Request request = new Request();
+        request.setStatus("pending");
+        request.setType("redesign");
+        request.setCreatedAt(LocalDateTime.now());
+        request.setStartDate(null);
+        request.setEndDate(null);
+        request.setIsPaid(false);
+
+        request.setTimeWindow(dto.getTimeWindow());
+        request.setDescription(dto.getDescription());
+
+        request.setCustomer(customer);
+        request.setProperty(property);
+
+        request.setCompany(company);
+        requestRepository.save(request);
+    }
 }

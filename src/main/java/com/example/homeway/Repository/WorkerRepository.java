@@ -29,6 +29,24 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
            """)
     Worker findAvailableMovingWorker(Integer companyId);
 
+    @Query("""
+            select w from Worker w
+            where w.company.id = ?1
+              and w.isAvailable = true
+              and w.user.role = 'WORKER'
+              and w.company.user.role = 'MAINTENANCE_COMPANY'
+           """)
+    Worker findAvailableMaintenanceWorker(Integer companyId);
+
+    @Query("""
+        select w from Worker w
+        where w.company.id = ?1
+          and w.isAvailable = true
+          and w.user.role = 'WORKER'
+          and w.company.user.role = 'REDESIGN_COMPANY'
+       """)
+    Worker findAvailableRedesignWorker(Integer companyId);
+
     List<Worker> findAllByCompany_Id(Integer companyId);
 
 }

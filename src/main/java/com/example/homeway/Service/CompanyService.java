@@ -17,6 +17,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final RequestRepository requestRepository;
     private final WorkerRepository workerRepository;
+    private final VehicleRepository vehicleRepository;
     private final OfferRepository offerRepository;
     private final NotificationRepository notificationRepository;
 
@@ -125,7 +126,7 @@ public class CompanyService {
         worker.setIsAvailable(false);
         workerRepository.save(worker);
 
-        request.getWorkers().add(worker);
+        request.setWorker(worker);
 
         request.setStatus("in_progress");
         request.setStartDate(LocalDate.now());
@@ -162,11 +163,11 @@ public class CompanyService {
             throw new ApiException("only in_progress requests can be completed");
         }
 
-        if (request.getWorkers() != null) {
-            for (Worker w : request.getWorkers()) {
-                w.setIsAvailable(true);
-            }
-            request.getWorkers().clear();
+        if (request.getWorker() != null) {
+            Worker w = request.getWorker();
+            w.setIsAvailable(true);
+            workerRepository.save(w);
+            request.setWorker(null);
         }
 
         request.setStatus("completed");
@@ -212,6 +213,579 @@ public class CompanyService {
         requestRepository.save(request);
 
         createCustomerNotification(request.getCustomer(), "Request rejected", "Your request has been rejected.");
+    }
+
+    @Transactional
+    public void approveMovingRequest(User user, Integer requestId, Double price) {
+
+        if (user == null) {
+            throw new ApiException("unauthorized");
+        }
+
+        Company company = user.getCompany();
+        if (company == null) {
+            throw new ApiException("company profile not found");
+        }
+
+        if (!"MOVING_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MOVING_COMPANY can approve moving requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) {
+            throw new ApiException("request not found with id: " + requestId);
+        }
+
+        if (!"moving".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not moving");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"pending".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only pending requests can be approved");
+        }
+
+        if (request.getOffer() != null) {
+            throw new ApiException("offer already exists for this request");
+        }
+
+        Offer offer = new Offer();
+        offer.setPrice(price);
+        offer.setStatus("not_paid");
+        offer.setCreatedAt(LocalDateTime.now());
+        offer.setRequest(request);
+        offerRepository.save(offer);
+
+        request.setStatus("approved");
+        requestRepository.save(request);
+
+        createCustomerNotification(
+                request.getCustomer(), "approved request", "Your moving request was approved. Please accept/reject the offer.");
+    }
+
+
+    @Transactional
+    public void startMovingRequest(User user, Integer requestId) {
+
+        if (user == null){
+            throw new ApiException("unauthorized");
+        }
+
+        Company company = user.getCompany();
+        if (company == null) {
+            throw new ApiException("company profile not found");
+        }
+
+        if (!"MOVING_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MOVING_COMPANY can start moving requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) {
+            throw new ApiException("request not found with id: " + requestId);
+        }
+
+        if (!"moving".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not MOVING");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"approved".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only approved requests can be started");
+        }
+
+        Offer offer = request.getOffer();
+        if (offer == null) {
+            throw new ApiException("offer does not exist for this request");
+        }
+        if (!"paid".equalsIgnoreCase(offer.getStatus())){
+            throw new ApiException("offer is not paid yet");
+        }
+
+        //assign worker and vehicle
+        Worker worker = workerRepository.findAvailableMovingWorker(company.getId());
+        if (worker == null) {
+            throw new ApiException("no available moving worker found");
+        }
+
+        Vehicle vehicle = vehicleRepository.findAvailableMovingVehicle(company.getId());
+        if (vehicle == null) {
+            throw new ApiException("no available vehicle found");
+        }
+
+        worker.setIsAvailable(false);
+        workerRepository.save(worker);
+
+        vehicle.setAvailable(false);
+        vehicleRepository.save(vehicle);
+
+        request.setWorker(worker);
+        request.setVehicle(vehicle);
+
+        request.setStatus("in_progress");
+        request.setStartDate(LocalDate.now());
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(), "request started", "Your moving request is now in progress.");
+    }
+
+    @Transactional
+    public void completeMovingRequest(User user, Integer requestId) {
+
+        if (user == null) throw new ApiException("unauthorized");
+
+        Company company = user.getCompany();
+        if (company == null) throw new ApiException("company profile not found");
+
+        if (!"MOVING_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MOVING_COMPANY can complete moving requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) throw new ApiException("request not found with id: " + requestId);
+
+        if (!"moving".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not MOVING");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"in_progress".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only in_progress requests can be completed");
+        }
+
+        //unassign worker
+        if (request.getWorker() != null) {
+            Worker w = request.getWorker();
+            w.setIsAvailable(true);
+            workerRepository.save(w);
+            request.setWorker(null);
+        }
+
+        // unassign vehicle
+        if (request.getVehicle() != null) {
+            Vehicle v = request.getVehicle();
+            v.setAvailable(true);
+            vehicleRepository.save(v);
+            request.setVehicle(null);
+        }
+
+        request.setStatus("completed");
+        request.setEndDate(LocalDate.now());
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(), "request completed", "Your moving request has been completed.");
+    }
+
+    @Transactional
+    public void rejectMovingRequest(User user, Integer requestId) {
+
+        if (user == null) {
+            throw new ApiException("unauthorized");
+        }
+
+        Company company = user.getCompany();
+        if (company == null) {
+            throw new ApiException("company profile not found");
+        }
+
+        if (!"MOVING_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MOVING_COMPANY can reject moving requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null){
+            throw new ApiException("request not found with id: " + requestId);
+        }
+
+        if (!"moving".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not MOVING");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"pending".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only pending requests can be rejected");
+        }
+
+        if (request.getOffer() != null) {
+            offerRepository.delete(request.getOffer());
+            request.setOffer(null);
+        }
+
+        request.setStatus("rejected");
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(),"request rejected","Your moving request has been rejected.");
+    }
+
+    public void approveRedesignRequest(User user, Integer requestId, Double price) {
+
+        if (user == null) throw new ApiException("unauthorized");
+        Company company = user.getCompany();
+        if (company == null) throw new ApiException("company profile not found");
+
+        if (!"REDESIGN_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only REDESIGN_COMPANY can approve redesign requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) throw new ApiException("request not found with id: " + requestId);
+
+        if (!"redesign".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not REDESIGN");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"pending".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only pending requests can be approved");
+        }
+
+        if (request.getOffer() != null) {
+            throw new ApiException("offer already exists for this request");
+        }
+
+        Offer offer = new Offer();
+        offer.setPrice(price);
+        offer.setStatus("not_paid");
+        offer.setCreatedAt(LocalDateTime.now());
+        offer.setRequest(request);
+        offerRepository.save(offer);
+
+        request.setStatus("approved");
+        requestRepository.save(request);
+
+        createCustomerNotification(
+                request.getCustomer(),
+                "Approved request",
+                "Your redesign request was approved. Please accept/reject the offer."
+        );
+    }
+
+    @Transactional
+    public void startRedesignRequest(User user, Integer requestId) {
+
+        if (user == null) {
+            throw new ApiException("unauthorized");
+        }
+        Company company = user.getCompany();
+        if (company == null) {
+            throw new ApiException("company profile not found");
+        }
+
+        if (!"REDESIGN_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only REDESIGN_COMPANY can start redesign requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null){
+            throw new ApiException("request not found with id: " + requestId);
+        }
+
+        if (!"redesign".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not REDESIGN");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"approved".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only approved requests can be started");
+        }
+
+        Offer offer = request.getOffer();
+        if (offer == null) {
+            throw new ApiException("offer does not exist for this request");
+        }
+        if (!"paid".equalsIgnoreCase(offer.getStatus())) {
+            throw new ApiException("offer is not paid yet");
+        }
+
+        if (request.getWorker() != null) {
+            throw new ApiException("request already has an assigned worker");
+        }
+
+        Worker worker = workerRepository.findAvailableRedesignWorker(company.getId());
+        if (worker == null) throw new ApiException("no available redesign worker found");
+
+        worker.setIsAvailable(false);
+        workerRepository.save(worker);
+
+        request.setWorker(worker);
+        request.setStatus("in_progress");
+        request.setStartDate(LocalDate.now());
+
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(), "Request started", "Your redesign request is now in progress.");
+    }
+
+    @Transactional
+    public void completeRedesignRequest(User user, Integer requestId) {
+
+        if (user == null) throw new ApiException("unauthorized");
+        Company company = user.getCompany();
+        if (company == null) throw new ApiException("company profile not found");
+
+        if (!"REDESIGN_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only REDESIGN_COMPANY can complete redesign requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) throw new ApiException("request not found with id: " + requestId);
+
+        if (!"redesign".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not REDESIGN");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"in_progress".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only in_progress requests can be completed");
+        }
+
+        Worker worker = request.getWorker();
+        if (worker != null) {
+            worker.setIsAvailable(true);
+            workerRepository.save(worker);
+            request.setWorker(null);
+        }
+
+        request.setStatus("completed");
+        request.setEndDate(LocalDate.now());
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(), "Request completed", "Your redesign request has been completed.");
+    }
+
+    @Transactional
+    public void rejectRedesignRequest(User user, Integer requestId) {
+
+        if (user == null) throw new ApiException("unauthorized");
+        Company company = user.getCompany();
+        if (company == null) throw new ApiException("company profile not found");
+
+        if (!"REDESIGN_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only REDESIGN_COMPANY can reject redesign requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) throw new ApiException("request not found with id: " + requestId);
+
+        if (!"redesign".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not REDESIGN");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"pending".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only pending requests can be rejected");
+        }
+
+        if (request.getOffer() != null) {
+            offerRepository.delete(request.getOffer());
+            request.setOffer(null);
+        }
+
+        request.setStatus("rejected");
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(), "Request rejected", "Your redesign request has been rejected.");
+    }
+
+    public void approveMaintenanceRequest(User user, Integer requestId, Double price) {
+
+        if (user == null) throw new ApiException("unauthorized");
+        Company company = user.getCompany();
+        if (company == null) throw new ApiException("company profile not found");
+
+        if (!"MAINTENANCE_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MAINTENANCE_COMPANY can approve maintenance requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) throw new ApiException("request not found with id: " + requestId);
+
+        if (!"maintenance".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not MAINTENANCE");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"pending".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only pending requests can be approved");
+        }
+
+        if (request.getOffer() != null) throw new ApiException("offer already exists for this request");
+
+        Offer offer = new Offer();
+        offer.setPrice(price);
+        offer.setStatus("not_paid");
+        offer.setCreatedAt(LocalDateTime.now());
+        offer.setRequest(request);
+        offerRepository.save(offer);
+
+        request.setStatus("approved");
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(),
+                "approved request",
+                "Your maintenance request was approved. Please accept/reject the offer.");
+    }
+
+    @Transactional
+    public void startMaintenanceRequest(User user, Integer requestId) {
+
+        if (user == null) {
+            throw new ApiException("unauthorized");
+        }
+        Company company = user.getCompany();
+        if (company == null){
+            throw new ApiException("company profile not found");
+        }
+
+        if (!"MAINTENANCE_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MAINTENANCE_COMPANY can start maintenance requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) {
+            throw new ApiException("request not found with id: " + requestId);
+        }
+
+        if (!"maintenance".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not MAINTENANCE");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"approved".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only approved requests can be started");
+        }
+
+        Offer offer = request.getOffer();
+        if (offer == null) {
+            throw new ApiException("offer does not exist for this request");
+        }
+        if (!"paid".equalsIgnoreCase(offer.getStatus())) throw new ApiException("offer is not paid yet");
+
+        Worker worker = workerRepository.findAvailableMaintenanceWorker(company.getId());
+        if (worker == null) throw new ApiException("no available maintenance worker found");
+
+        worker.setIsAvailable(false);
+        workerRepository.save(worker);
+
+        request.setWorker(worker);
+        request.setStatus("in_progress");
+        request.setStartDate(LocalDate.now());
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(),"request started", "Your maintenance request is now in progress.");
+    }
+
+    @Transactional
+    public void completeMaintenanceRequest(User user, Integer requestId) {
+
+        if (user == null) {
+            throw new ApiException("unauthorized");
+        }
+        Company company = user.getCompany();
+        if (company == null){
+            throw new ApiException("company profile not found");
+        }
+
+        if (!"MAINTENANCE_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MAINTENANCE_COMPANY can complete maintenance requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null){
+            throw new ApiException("request not found with id: " + requestId);
+        }
+
+        if (!"maintenance".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not MAINTENANCE");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"in_progress".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only in_progress requests can be completed");
+        }
+
+        if (request.getWorker() != null) {
+            Worker w = request.getWorker();
+            w.setIsAvailable(true);
+            workerRepository.save(w);
+            request.setWorker(null);
+        }
+
+        request.setStatus("completed");
+        request.setEndDate(LocalDate.now());
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(), "request completed", "Your maintenance request has been completed. Report will be received soon.");
+    }
+
+    @Transactional
+    public void rejectMaintenanceRequest(User user, Integer requestId) {
+
+        if (user == null) throw new ApiException("unauthorized");
+        Company company = user.getCompany();
+        if (company == null) throw new ApiException("company profile not found");
+
+        if (!"MAINTENANCE_COMPANY".equalsIgnoreCase(user.getRole())) {
+            throw new ApiException("only MAINTENANCE_COMPANY can reject maintenance requests");
+        }
+
+        Request request = requestRepository.findRequestById(requestId);
+        if (request == null) throw new ApiException("request not found with id: " + requestId);
+
+        if (!"maintenance".equalsIgnoreCase(request.getType())) {
+            throw new ApiException("request type is not MAINTENANCE");
+        }
+
+        if (request.getCompany() == null || !request.getCompany().getId().equals(company.getId())) {
+            throw new ApiException("request is not assigned to this company");
+        }
+
+        if (!"pending".equalsIgnoreCase(request.getStatus())) {
+            throw new ApiException("only pending requests can be rejected");
+        }
+
+        if (request.getOffer() != null) {
+            offerRepository.delete(request.getOffer());
+            request.setOffer(null);
+        }
+
+        request.setStatus("rejected");
+        requestRepository.save(request);
+
+        createCustomerNotification(request.getCustomer(), "request rejected", "Your maintenance request has been rejected.");
     }
 
     private void createCustomerNotification(Customer customer, String title, String message) {

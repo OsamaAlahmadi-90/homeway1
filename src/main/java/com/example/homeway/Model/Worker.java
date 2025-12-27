@@ -34,7 +34,7 @@ public class Worker {
     @JsonIgnore
     private Company company;
 
-    @ManyToMany(mappedBy = "workers")
+    @OneToMany(mappedBy = "worker")
     @JsonIgnore
     private Set<Request> requests;
 
