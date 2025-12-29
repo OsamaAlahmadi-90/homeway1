@@ -396,110 +396,116 @@ public class AIService {
     }
 
     //Leen
-    public String CustomerAskAIWhatServiceDoesTheIssueFits(String input) {
+    // 1) Before creating request: what service fits?
+    public String customerAskAIWhatServiceDoesTheIssueFits(String input) {
         String prompt = """
-                You are an ... assistant.
-                Explain in clear, simple steps how to ...  and list some simple resources, be short 5-8 sentences:
+                You are a home services assistant for a platform that offers:
+                (1) Inspection, (2) Maintenance, (3) Redesign, (4) Moving.
+                In 5-8 sentences, decide what the customer needs.
 
-                input: %s
+                Customer issue: %s
 
-                Mention:
-                - 1
-                - 2
-                - 3
-                - 4
-                
+                Rules:
+                - If safety/structural/electrical/plumbing risk is mentioned, recommend Inspection first.
+                - If it is a simple fix (leak, broken part, AC not cooling, appliance issue), recommend Maintenance.
+                - If the customer wants a new layout/style/renovation, recommend Redesign.
+                - If the request is about relocating items/house move, recommend Moving.
+                - End with: "Recommended service: X" (one service only).
                 """.formatted(input);
 
         return askChat(prompt);
     }
 
-    public String CustomerIsFixOrDesignCheaper(String input) {
+    // 2) Cheaper: fix vs redesign
+    public String customerIsFixOrDesignCheaper(String input) {
         String prompt = """
-                You are an ... assistant.
-                Explain in clear, simple steps how to ...  and list some simple resources, be short 5-8 sentences:
+                You are a cost-awareness assistant for home issues.
+                In 5-8 sentences, predict whether fixing is likely cheaper than redesigning, and explain why.
 
-                input: %s
+                Issue description: %s
 
-                Mention:
-                - 1
-                - 2
-                - 3
-                - 4
-                
+                Rules:
+                - If the problem is localized/small scope, lean "Fix is cheaper".
+                - If multiple rooms/major damage/old infrastructure is involved, lean "Redesign might be better long-term".
+                - Mention uncertainty and what extra details would change the estimate (materials, area size, severity).
+                - End with: "Likely cheaper: FIX" or "Likely cheaper: REDESIGN".
                 """.formatted(input);
 
         return askChat(prompt);
     }
 
-    public String WorkerReportCreationAssistent(String input) {
+    // 3) Worker report writing assistant (bullet points -> professional report)
+    public String workerReportCreationAssistant(String input) {
         String prompt = """
-                You are an ... assistant.
-                Explain in clear, simple steps how to ...  and list some simple resources, be short 5-8 sentences:
+                You are a professional report writing assistant for field workers.
+                Convert the worker notes into a clear, professional report.
+                Keep it structured and remove ambiguity.
 
-                input: %s
+                Worker notes (bullet points / rough notes): %s
 
-                Mention:
-                - 1
-                - 2
-                - 3
-                - 4
-                
+                Report format:
+                - Title
+                - Summary (2-3 lines)
+                - Findings (bullets)
+                - Recommended Actions (bullets)
+                - Risks / Safety Notes (if any)
+                - Next Steps
                 """.formatted(input);
 
         return askChat(prompt);
     }
 
-    public String CompanyInspectionPlanningAssistent(String input) {
+    // 4) Smart inspection planning (checklist + priorities)
+    public String companyInspectionPlanningAssistant(String input) {
         String prompt = """
-                You are an ... assistant.
-                Explain in clear, simple steps how to ...  and list some simple resources, be short 5-8 sentences:
+                You are an inspection planning assistant.
+                Create a practical inspection checklist and prioritize risk areas.
+                Be short and actionable (5-10 bullets).
 
-                input: %s
+                Inspection description from request: %s
 
                 Mention:
-                - 1
-                - 2
-                - 3
-                - 4
-                
+                - Priority order (High/Medium/Low)
+                - Tools needed (if obvious)
+                - Red flags to look for
+                - What photos/evidence to capture
                 """.formatted(input);
 
         return askChat(prompt);
     }
 
-
-    public String MovingCompanyTimeAdvice(String CityAndTime) {
+    // 5) Moving company timing advice (city/time window -> best time + traffic notes)
+    public String movingCompanyTimeAdvice(String cityAndTime) {
         String prompt = """
-                You are an ... assistant.
-                Explain in clear, simple steps how to ...  and list some simple resources, be short 5-8 sentences:
+                You are a moving logistics assistant.
+                In 5-8 sentences, suggest the best moving time and what to consider.
 
-                input: %s
+                Input (city + time window + any constraints): %s
 
                 Mention:
-                - 1
-                - 2
-                - 3
-                - 4
-                
-                """.formatted(CityAndTime);
+                - Best suggested time range
+                - Traffic considerations
+                - Weather/heat considerations if relevant
+                - Parking/building access tips
+                - A short checklist for the customer
+                """.formatted(cityAndTime);
 
         return askChat(prompt);
     }
 
-    public String MaintenanceFixOrReplace(String input) {
+    // 6) Maintenance: repair vs replace advice
+    public String maintenanceFixOrReplace(String input) {
         String prompt = """
-                You are an ... assistant.
-                Explain in clear, simple steps how to ...  and list some simple resources, be short 5-8 sentences:
+                You are a maintenance technician assistant.
+                In 5-8 sentences, advise whether to repair or replace, and why.
 
-                input: %s
+                Issue description: %s
 
                 Mention:
-                - 1
-                - 2
-                - 3
-                - 4
-                
+                - Age/condition clues (if missing, say what you need)
+                - Safety and reliability
+                - Cost vs longevity tradeoff
+                - End with: "Recommendation: REPAIR" or "Recommendation: REPLACE"
                 """.formatted(input);
 
         return askChat(prompt);

@@ -1,5 +1,7 @@
 package com.example.homeway.Controller;
+import com.example.homeway.AIService.AIService;
 import com.example.homeway.API.ApiResponse;
+import com.example.homeway.DTO.Ai.DescriptionDTOIn;
 import com.example.homeway.DTO.Ai.ReviewAssistDTOIn;
 import com.example.homeway.DTO.In.CustomerDTOIn;
 import com.example.homeway.Model.User;

@@ -2,6 +2,7 @@ package com.example.homeway.Service;
 
 import com.example.homeway.AIService.AIService;
 import com.example.homeway.API.ApiException;
+import com.example.homeway.DTO.Ai.DescriptionDTOIn;
 import com.example.homeway.DTO.Ai.RepairChecklistDTOIn;
 import com.example.homeway.DTO.Ai.ReviewAssistDTOIn;
 import com.example.homeway.DTO.In.CustomerDTOIn;
@@ -264,8 +265,29 @@ public class CustomerService {
         return aiService.redesignCompanyRedesignScope(description);
     }
 
+    public String customerAskAIWhatServiceDoesTheIssueFits(User user, DescriptionDTOIn dto) {
 
+        if (user == null) throw new ApiException("unauthorized");
+        if (user.getCustomer() == null) throw new ApiException("customer profile not found");
 
+        if (!Boolean.TRUE.equals(user.getIsSubscribed())) {
+            throw new ApiException("You must be subscribed to use AI features");
+        }
+
+        return aiService.customerAskAIWhatServiceDoesTheIssueFits(dto.getDescription());
+    }
+
+    public String customerIsFixOrDesignCheaper(User user, DescriptionDTOIn dto) {
+
+        if (user == null) throw new ApiException("unauthorized");
+        if (user.getCustomer() == null) throw new ApiException("customer profile not found");
+
+        if (!Boolean.TRUE.equals(user.getIsSubscribed())) {
+            throw new ApiException("You must be subscribed to use AI features");
+        }
+
+        return aiService.customerIsFixOrDesignCheaper(dto.getDescription());
+    }
 }
 
 
