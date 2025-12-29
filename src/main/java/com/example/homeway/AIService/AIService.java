@@ -564,4 +564,41 @@ public class AIService {
 
         return askChat(prompt);
     }
+
+    public String companyIssueImageDiagnosis(String url, String language) {
+        String prompt = """
+                You are a maintenance/inspection diagnosis assistant.
+                Based on the image url passed, scan the image and give a simple explanation for the issue in the image.
+                Be short: 5-8 sentences maximum.
+                
+                url:
+                %s
+                
+                language:
+                %s
+                
+                Mention:
+                - Which option is better and why
+                - 2 decision factors (age/condition, safety, cost, availability, frequency of failure)
+                - If inspection is needed first, say it
+                
+                Rules:
+                1) If the image is NOT accessible, low quality, or unclear: say so and ask for 1–2 better photos + what angle is needed.
+                2) Do NOT guess invisible details (no made-up measurements, no fake materials, no fake brands).
+                3) If there is ANY safety risk (electricity, gas, structural crack, mold, water near outlets), flag it as "HIGH" risk.
+                4) Always classify the best service type:
+                   - INSPECTION first if risk/uncertainty is high
+                   - MAINTENANCE if it’s a clear fix/repair
+                   - REDESIGN only if it’s cosmetic/upgrade or repeated failures
+                   - MOVING only if the scene is about items/packing/space
+                5) Keep the response short and action-focused.
+                
+                Output:
+                1) Summary (14 lines), organize it to make it easy to read
+                2) What service it needs, inspection, maintenance.
+                3) Tips, list them (1,2,3,..)
+                """.formatted(url,language);
+
+        return askChat(prompt);
+    }
 }

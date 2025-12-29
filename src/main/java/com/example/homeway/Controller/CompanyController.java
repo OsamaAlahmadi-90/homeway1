@@ -215,4 +215,11 @@ public class CompanyController {
         return ResponseEntity.status(200).body(companyService.maintenanceFixOrReplace(user, dto));
     }
 
+
+    @PostMapping("/image-diagnosis/{language}")
+    public ResponseEntity<?> diagnoseIssueFromImage(@AuthenticationPrincipal User user, @RequestBody @Valid DescriptionDTOIn dto,@PathVariable String language) {
+        String result = companyService.companyIssueImageDiagnosis(user, dto.getDescription(), language);
+        return ResponseEntity.ok(result);
+    }
+
 }

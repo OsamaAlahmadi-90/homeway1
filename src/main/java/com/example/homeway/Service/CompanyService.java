@@ -1257,6 +1257,31 @@ public class CompanyService {
     }
 
 
+    public String companyIssueImageDiagnosis(User user, String imageUrl, String language) {
+
+        if (user == null) {
+            throw new ApiException("unauthorized");
+        }
+
+        if (user.getWorker() == null) {
+            throw new ApiException("worker profile not found");
+        }
+
+        if (!Boolean.TRUE.equals(user.getIsSubscribed())) {
+            throw new ApiException("You must be subscribed to use AI features");
+        }
+
+        if (!user.getWorker().getIsActive()) {
+            throw new ApiException("worker is not active");
+        }
+
+        if (imageUrl == null || imageUrl.isBlank()) {
+            throw new ApiException("image url is required");
+        }
+
+        return aiService.companyIssueImageDiagnosis(imageUrl, language);
+    }
+
     public CompanyDTOOut convertToDTO(Company company) {
         User u = company.getUser();
         return new CompanyDTOOut(
