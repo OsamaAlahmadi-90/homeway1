@@ -35,6 +35,26 @@
             text-align: right;
         }
     </style>
+    <script>
+        function switchLanguage(lang) {
+            // Hide all content
+            document.getElementById('content-en').classList.remove('active');
+            document.getElementById('content-ar').classList.remove('active');
+            
+            // Remove active from all buttons
+            document.getElementById('btn-en').classList.remove('active');
+            document.getElementById('btn-ar').classList.remove('active');
+            
+            // Show selected content and activate button
+            if (lang === 'en') {
+                document.getElementById('content-en').classList.add('active');
+                document.getElementById('btn-en').classList.add('active');
+            } else {
+                document.getElementById('content-ar').classList.add('active');
+                document.getElementById('btn-ar').classList.add('active');
+            }
+        }
+    </script>
 </head>
 <body>
 
@@ -737,27 +757,6 @@
 <p><a href="#top-ar">↑ العودة للأعلى</a></p>
 
 </div>
-
-<script>
-function switchLanguage(lang) {
-    // Hide all content
-    document.getElementById('content-en').classList.remove('active');
-    document.getElementById('content-ar').classList.remove('active');
-    
-    // Remove active from all buttons
-    document.getElementById('btn-en').classList.remove('active');
-    document.getElementById('btn-ar').classList.remove('active');
-    
-    // Show selected content and activate button
-    if (lang === 'en') {
-        document.getElementById('content-en').classList.add('active');
-        document.getElementById('btn-en').classList.add('active');
-    } else {
-        document.getElementById('content-ar').classList.add('active');
-        document.getElementById('btn-ar').classList.add('active');
-    }
-}
-</script>
 
 </body>
 </html>
