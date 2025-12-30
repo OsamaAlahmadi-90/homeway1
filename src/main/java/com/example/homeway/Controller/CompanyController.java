@@ -195,7 +195,7 @@ public class CompanyController {
         return ResponseEntity.status(200).body(result);
     }
 
-    @PostMapping("/report-writing")
+    @PostMapping("/reportWriting")
     public ResponseEntity<?> workerReportCreationAssistant(@AuthenticationPrincipal User user, @RequestBody @Valid DescriptionDTOIn dto) {
         return ResponseEntity.status(200).body(companyService.workerReportCreationAssistant(user, dto));
     }
@@ -219,7 +219,7 @@ public class CompanyController {
     @PostMapping("/image-diagnosis/{language}")
     public ResponseEntity<?> diagnoseIssueFromImage(@AuthenticationPrincipal User user, @RequestBody @Valid DescriptionDTOIn dto,@PathVariable String language) {
         String result = companyService.companyIssueImageDiagnosis(user, dto.getDescription(), language);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.status(200).body(result);
     }
 
 }

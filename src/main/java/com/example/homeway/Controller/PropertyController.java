@@ -26,11 +26,9 @@ public class PropertyController {
     // Description: Customer can add a new property
     // =====================================
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> createProperty(@AuthenticationPrincipal User user, @RequestBody @Valid PropertyDTOIn propertyDTOIn
-    ) {
+    public ResponseEntity<?> createProperty(@AuthenticationPrincipal User user, @RequestBody @Valid PropertyDTOIn propertyDTOIn) {
         propertyService.createProperty(user, propertyDTOIn);
-        return ResponseEntity.status(200)
-                .body(new ApiResponse("Property created successfully"));
+        return ResponseEntity.status(200).body(new ApiResponse("Property created successfully"));
     }
 
     // =====================================
@@ -38,9 +36,8 @@ public class PropertyController {
     // Description: Customer can retrieve all his properties
     // =====================================
     @GetMapping("/my")
-    public ResponseEntity<List<Property>> getMyProperties(@AuthenticationPrincipal User user) {
-        return ResponseEntity.status(200)
-                .body(propertyService.getMyProperties(user));
+    public ResponseEntity<?> getMyProperties(@AuthenticationPrincipal User user) {
+        return ResponseEntity.status(200).body(propertyService.getMyProperties(user));
     }
 
     // =====================================

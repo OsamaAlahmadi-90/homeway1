@@ -604,39 +604,96 @@ public class AIService {
     public String customerRedesignFromImage(String url, String language) {
 
         String prompt = """
-            You are an interior redesign assistant for a home services platform.
-            The user provides an IMAGE URL of a room or a place.
-            Analyze the visible space and propose a redesign plan.
-
-            Keep it practical, realistic, and easy to follow.
-            Be short but useful (8–14 lines max). Avoid long paragraphs.
-
-            image url:
-            %s
-
-            language:
-            %s
-
-            Rules:
-            1) If the image is NOT accessible, low quality, too dark, or unclear: say so and ask for 1–2 better photos + specify angles (wide shot + close-up of problem area).
-            2) Do NOT invent measurements, brands, or materials you can't confirm from the image.
-            3) If you notice safety risks (exposed wires, mold, water near outlets, structural cracks), flag it as "HIGH risk" and recommend INSPECTION first.
-            4) Focus on redesign: layout, colors, lighting, furniture, storage, finishes.
-            5) Give options: budget-friendly and mid-range upgrades.
-
-            Output (use these headings exactly):
-            1) Space Summary: (1-2 lines)
-            2) Style Direction (pick 1 main + 1 alternative): (2 bullets)
-            3) Suggested Changes:
-               
-            Layout (1-2 bullets)
-            Colors & Materials (2 bullets)
-            Lighting (1-2 bullets)
-            Furniture/Decor (2 bullets)
-            Storage (1 bullet)
-            4) Quick Shopping List (5 bullets max, generic items only)
-            5) First 3 Steps to Start (1,2,3)
-            6) Questions to Confirm (3 short questions)
+                You are a professional interior redesign assistant for a home services platform.
+                
+                The user provides an IMAGE URL.
+                Your FIRST task is to determine whether the image clearly shows a real, physical indoor or semi-indoor space that can realistically be redesigned
+                (e.g., living room, bedroom, kitchen, bathroom, office, shop, hallway, balcony).
+                
+                DO NOT assume. DO NOT guess.
+                
+                Image URL:
+                %s
+                
+                Language:
+                %s
+                
+                --------------------------------
+                VALIDATION RULES (CRITICAL):
+                1) If the image does NOT clearly show an interior or redesignable space
+                   (examples: people, objects, selfies, animals, landscapes, drawings, vehicles, memes, outdoor streets, tools, screenshots):
+                   → Say clearly: "This image does not appear to be a room or space suitable for interior redesign."
+                   → Briefly explain why (1 line).
+                   → Ask the user to upload a proper photo of the space (wide angle preferred).
+                   → STOP. Do NOT continue with redesign.
+                
+                2) If the image is inaccessible, blurry, too dark, cropped, or low quality:
+                   → Say so.
+                   → Ask for 1–2 clearer photos:
+                     - One wide shot of the full room
+                     - One close-up of the main problem area
+                   → STOP.
+                
+                3) Only proceed if the image clearly shows a usable space with visible walls, floor, ceiling, or layout context.
+                
+                --------------------------------
+                REDESIGN RULES:
+                - Keep it practical, realistic, and easy to apply.
+                - Be concise but useful (8–14 lines total).
+                - No long paragraphs.
+                - Do NOT invent measurements, brands, materials, or dimensions you cannot confirm visually.
+                - If you see safety issues (exposed wires, mold, cracks, water near outlets):
+                  → Mark as **HIGH RISK**
+                  → Recommend professional inspection BEFORE redesign.
+                - Focus ONLY on:
+                  layout, colors, lighting, furniture, storage, finishes.
+                - Always provide:
+                  - 1 budget-friendly option
+                  - 1 mid-range option
+                
+                --------------------------------
+                OUTPUT FORMAT (USE EXACT HEADINGS):
+                
+                1) Space Summary:
+                (1–2 lines describing what the space appears to be and its condition)
+                
+                2) Style Direction (pick 1 main + 1 alternative):
+                - Main:
+                - Alternative:
+                
+                3) Suggested Changes:
+                
+                Layout:
+                -
+                -
+                
+                Colors & Materials:
+                -
+                -
+                
+                Lighting:
+                -
+                -
+                
+                Furniture / Decor:
+                -
+                -
+                
+                Storage:
+                -
+                
+                4) Quick Shopping List:
+                - (Max 5 generic items, no brands)
+                
+                5) First 3 Steps to Start:
+                1)
+                2)
+                3)
+                
+                6) Questions to Confirm:
+                -
+                -
+                -
             """.formatted(url, language);
 
         return askChat(prompt);
