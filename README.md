@@ -381,10 +381,10 @@
   <li><a href="#introduction-ar">1. المقدمة</a></li>
   <li><a href="#key-features-ar">2. الميزات الرئيسية</a></li>
   <li><a href="#roles-permissions-ar">3. أدوار المستخدمين والصلاحيات</a></li>
-  <li><a href="#architecture-ar">4. البنية المعمارية</a></li>
+  <li><a href="#architecture-ar">4. بينة المشروع</a></li>
   <li><a href="#core-workflows-ar">5. سير العمل الأساسي</a></li>
   <li><a href="#problems-solved-ar">6. المشاكل التي تم حلها</a></li>
-  <li><a href="#contributors-ar">7. المساهمون</a></li>
+  li><a href="#Important-URLs">8. روابط مهمة</a></li>
 </ul>
 
 <hr />
@@ -587,7 +587,7 @@
 <h3>سير ميزات الذكاء الاصطناعي</h3>
 <ol>
   <li>المستخدم يشترك في خطة الذكاء الاصطناعي (تخزين الاشتراك وتتبع الدفع).</li>
-  <li>كل نقطة نهاية للذكاء الاصطناعي تتحقق من حالة الاشتراك قبل الاستجابة.</li>
+  <li>كل ميزة للذكاء الاصطناعي تتحقق من حالة الاشتراك قبل الاستجابة.</li>
   <li>قواعد إضافية تُطبق حسب نوع الأداة:
     <ul>
       <li>يجب أن يكون العامل نشطًا لأدوات العامل.</li>
@@ -617,11 +617,11 @@
 <h2 id="contributors-ar">8. المساهمون</h2>
 
 <h3><a href="https://github.com/Turki1927">@Turki1927</a></h3>
-<p><strong>تطوير الواجهة الخلفية:</strong></p>
+<p><strong>برمجة الواجهة الخلفية:</strong></p>
 <ul>
-  <li>كيانات العقار، العامل، المسؤول</li>
+  <li>كلاس: العقار، العامل، المسؤول</li>
   <li>نظام الإشعارات</li>
-  <li>SubscriptionPaymentService، UserSubscriptionService</li>
+  <li>خدمات الاشتراك، اشتراك المستحدم</li>
   <li>سير الطلبات: الصيانة وإعادة التصميم</li>
 </ul>
 <p><strong>الاختبار والتصميم:</strong></p>
@@ -636,16 +636,16 @@
   <li>تكامل دفع الاشتراك (ميسر)</li>
   <li>تكامل البريد الإلكتروني (الاشتراك/الإشعارات)</li>
   <li>
-    نقاط نهاية الذكاء الاصطناعي:
+     الذكاء الاصطناعي:
     customerServicesTimeEstimation، customerReviewWritingAssist، workerRepairChecklist،
     workerSafetyRequirements، companyServiceEstimationCost، maintenanceCompanySparePartsCosts
   </li>
 </ul>
 
 <h3><a href="https://github.com/leenref">@leenref</a></h3>
-<p><strong>تطوير الواجهة الخلفية:</strong></p>
+<p><strong>برمجة الواجهة الخلفية:</strong></p>
 <ul>
-  <li>كيانات التقرير، المركبة، العميل</li>
+  <li>كلاس: التقرير، المركبة، العميل</li>
   <li>RequestPaymentService</li>
   <li>سير الطلب: النقل</li>
 </ul>
@@ -662,7 +662,7 @@
   <li>نشر المنصة</li>
   <li>تكامل دفع الخدمة (ميسر)</li>
   <li>
-    نقاط نهاية الذكاء الاصطناعي:
+    الذكاء الاصطناعي:
     customerAskAIWhatServiceDoesTheIssueFits، customerIsFixOrDesignCheaper،
     workerReportCreationAssistant، companyInspectionPlanningAssistant،
     movingCompanyTimeAdvice، maintenanceFixOrReplace
@@ -670,9 +670,9 @@
 </ul>
 
 <h3><a href="https://github.com/OsamaAlahmadi-90">@OsamaAlahmadi-90</a></h3>
-<p><strong>تطوير الواجهة الخلفية:</strong></p>
+<p><strong>برمجة الواجهة الخلفية:</strong></p>
 <ul>
-  <li>كيانات المستخدم، العرض (Offer)، UserRegister، المراجعة (Review)، الشركة (Company)</li>
+  <li>كلاسس المستخدم، العرض (Offer)، UserRegister، المراجعة (Review)، الشركة (Company)</li>
   <li>سير الطلب: الفحص</li>
 </ul>
 <p><strong>الاختبار والتصميم:</strong></p>
@@ -688,7 +688,7 @@
 <ul>
   <li>تكامل البريد الإلكتروني (طلبات الشركة/العميل)</li>
   <li>
-    نقاط نهاية الذكاء الاصطناعي:
+     الذكاء الاصطناعي:
     customerRequestCostEstimation، customerReportSummary، workerIssueDiagnosis،
     movingCompanyResourceMovingEstimation، workerJobTimeEstimation،
     maintenanceCompanyMaintenancePlan، redesignCompanyRedesignScope،
@@ -700,7 +700,45 @@
 
 </div>
 
+<h2 id="Important-URLs">8. روابط مهمة</h2>
+<ul>
+  <li>
+    <strong>Class Diagram:</strong>
+    <a href="https://lucid.app/lucidchart/47e4b69c-9bff-418c-ad03-7ed25d25c199/edit?viewport_loc=-1816%2C-1410%2C4462%2C2187%2C0_0&invitationId=inv_36319b19-7def-45b6-a86b-72934fe0c837" target="_blank" rel="noopener noreferrer">
+      View on Lucidchart
+    </a>
+  </li>
 
+  <li>
+    <strong>Use Case Diagram:</strong>
+    <a href="https://drive.google.com/drive/folders/1jB0D8T1SjteDa87LWLz9frjvSCUzD8IX?usp=sharing" target="_blank" rel="noopener noreferrer">
+      View on Google Drive
+    </a>
+  </li>
+
+  <li>
+    <strong>Figma Prototype:</strong>
+    <a href="https://www.figma.com/proto/5OcMdpnEfV2zYJfFpeEIv3/Untitled?node-id=1-462&p=f&t=6bHOrJYD9VWWDFO3-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=1%3A462&show-proto-sidebar=1" target="_blank" rel="noopener noreferrer">
+      Open Design
+    </a>
+  </li>
+
+  <li>
+    <strong>Postman Documentation:</strong>
+    <a href="https://documenter.getpostman.com/view/49822372/2sBXVbGtCP" target="_blank" rel="noopener noreferrer">
+      View API Docs
+    </a>
+  </li>
+
+  <li>
+    <strong>AWS Domain:</strong>
+    <a href="https://HomeWay-Application-env.eba-nr2pgrvr.eu-central-1.elasticbeanstalk.com" target="_blank" rel="noopener noreferrer">
+      https://HomeWay-Application-env.eba-nr2pgrvr.eu-central-1.elasticbeanstalk.com
+    </a>
+  </li>
+</ul>
+<p><a href="#top">↑ Back to top</a></p>
+</div>
 
 
 
